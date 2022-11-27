@@ -29,6 +29,12 @@ const drawerWidth = 240;
 function RightSideBar() {
   return (
     <Drawer
+      PaperProps={{
+        sx: {
+          backgroundColor: "DarkOrange",
+          color: "red",
+        }
+      }}
       sx={{
         width: drawerWidth,
         flexShrink: 0,
@@ -40,7 +46,7 @@ function RightSideBar() {
       variant="permanent"
       anchor="right"
     >
-      
+
     </Drawer>
   );
 }

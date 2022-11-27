@@ -1,5 +1,4 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import logo from './logo.svg';
 import { Counter } from './features/counter/Counter';
 import './App.css';
 import Box from '@mui/material/Box';
@@ -22,58 +21,61 @@ import MailIcon from '@mui/icons-material/Mail';
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import Sidebar from '../src/components/Sidebar'
 import RightSideBar from '../src/components/RightSidebar'
+import SendIcon from '@mui/icons-material/Send';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
-import { Button, makeStyles, MenuItem, Modal, Select } from '@mui/material';
+import { Button, Grid, MenuItem, Modal, Select } from '@mui/material';
 import "leaflet/dist/leaflet.css";
-function initMap(): void {
-  // The location of Uluru
-  const uluru = { lat: -25.344, lng: 131.031 };
-  // The map, centered at Uluru
-  const map = new google.maps.Map(
-    document.getElementById("map") as HTMLElement,
-    {
-      zoom: 4,
-      center: uluru,
-    }
-  );
 
-  // The marker, positioned at Uluru
-  const marker = new google.maps.Marker({
-    position: uluru,
-    map: map,
-  });
-}
 
-declare global {
-  interface Window {
-    initMap: () => void;
-  }
-}
-window.initMap = initMap;
-const useStyles = makeStyles({
-  SidebarStyle: {
-    background: "blue"
-  }
+//L.Marker.prototype.options.icon = DefaultIcon TODO
+const L = require('leaflet');
+
+const myIcon = L.icon({
+  iconUrl: require('./shadowicon.png'),
+  iconSize: [64, 64],
+  iconAnchor: [32, 64],
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
 });
 const drawerWidth = 240;
 function App() {
   const [cidade, setCidade] = useState<String>('Curitiba');
   const [bairro, setBairro] = useState<String>('Centro');
+  const [unidadeConsumidora, setUnidadeConsumidora] = useState<String>('000000001');
   const [transformador, setTransformador] = useState<String>();
   const [isCidadeModalOpen, setIsCidadeModalOpen] = useState<boolean>(false);
   const [isBairroModalOpen, setIsBairroModalOpen] = useState(false);
+  const [isUnidadeTransformadoraOpen, setIsUnidadeTransformadoraOpen] = useState<boolean>(false);
+  const [isAnalisarDrawerOpen, setIsAnalisarDrawerOpen] = useState<boolean>(false);
   const [isTransformadorModalOpen, setIsTransformadorModalOpen] = useState(false);
+  const [isGato, setIsGato] = useState<boolean>(false);
   const handleCidade = () => {
     setIsCidadeModalOpen(true);
+    setIsAnalisarDrawerOpen(false);
   }
   const handleCidadeClose = () => {
     setIsCidadeModalOpen(false);
+    setIsAnalisarDrawerOpen(false);
   }
   const handleBairro = () => {
     setIsBairroModalOpen(true);
+    setIsAnalisarDrawerOpen(false);
   }
   const handleBairroClose = () => {
     setIsBairroModalOpen(false);
+  }
+  const handleUnidadeConsumidora = () => {
+    setIsUnidadeTransformadoraOpen(true);
+  }
+  const handleUnidadeConsumidoraClose = () => {
+    setIsUnidadeTransformadoraOpen(false);
+  }
+
+  const handleAnalisar = () => {
+    setIsAnalisarDrawerOpen(true);
+
   }
   const Boxstyle = {
     position: 'absolute' as 'absolute',
@@ -91,7 +93,12 @@ function App() {
 
     <div /*style={{ backgroundImage: `url(/lowResBackground.png)` }} */ >
       <Drawer
-      classes={{ }}
+        PaperProps={{
+          sx: {
+            backgroundColor: "DarkOrange",
+            color: "red",
+          }
+        }}
         sx={{
           width: drawerWidth,
           color: 'yellow',
@@ -111,17 +118,87 @@ function App() {
           <ListItem>
             <ListItemButton onClick={handleCidade}>
               <ListItemIcon ><LocationCityIcon /></ListItemIcon>
-              <ListItemText primary={"Cidade"} />
+              <ListItemText disableTypography
+                primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>Cidade</Typography>} />
             </ListItemButton>
           </ListItem>
           <ListItem>
             <ListItemButton onClick={handleBairro}>
               <ListItemIcon ><HouseIcon /></ListItemIcon>
-              <ListItemText primary={"Bairro"} />
+              <ListItemText primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>Bairro</Typography>} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem>
+            <ListItemButton onClick={handleUnidadeConsumidora}>
+              <ListItemIcon ><ElectricBoltIcon /></ListItemIcon>
+              <ListItemText primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>Unidade Consumidora</Typography>} />
             </ListItemButton>
           </ListItem>
         </List>
         <Divider />
+        <ListItem>
+          <ListItemButton onClick={handleAnalisar}>
+            <ListItemIcon ><SendIcon /></ListItemIcon>
+            <ListItemText primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>Analisar</Typography>} />
+          </ListItemButton>
+        </ListItem>
+        <Divider />
+      </Drawer>
+      <Drawer
+        PaperProps={{
+          sx: {
+            backgroundColor: "DarkOrange",
+            color: "red",
+          }
+        }}
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
+        open={isAnalisarDrawerOpen}
+        variant="persistent"
+        anchor="right"
+      >
+        <Grid container margin={2}>
+          <Grid item>
+            <Divider />
+            <List>
+              <ListItem>
+                <ListItemButton onClick={handleCidade}>
+                  <ListItemIcon ><LocationCityIcon /></ListItemIcon>
+                  <ListItemText disableTypography
+                    primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>{cidade}</Typography>} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem>
+                <ListItemButton onClick={handleBairro}>
+                  <ListItemIcon ><HouseIcon /></ListItemIcon>
+                  <ListItemText primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>{bairro}</Typography>} />
+                </ListItemButton>
+              </ListItem>
+              <ListItem>
+                <ListItemButton onClick={handleUnidadeConsumidora}>
+                  <ListItemIcon ><ElectricBoltIcon /></ListItemIcon>
+                  <ListItemText primary={<Typography variant="body2" style={{ color: '#FFFFFF' }}>{unidadeConsumidora}</Typography>} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+
+            <Divider />
+          </Grid>
+          <br />
+          <Grid item>
+            {!isGato && <img src={"/correct.png"} width={'200px'}></img>}
+            <Divider />
+            <Typography variant="h6" style={{ color: '#FFFFFF' }}>Unidade consumidora segura</Typography>
+            <Divider />
+          </Grid>
+        </Grid>
+
       </Drawer>
       <Modal
         open={isCidadeModalOpen}
@@ -137,7 +214,7 @@ function App() {
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             value={cidade}
-            label="Age"
+            label="Cidade"
             onChange={(e) => setCidade(e.target.value as string)}
           >
             <MenuItem value={'Curitiba'}>Curitiba</MenuItem>
@@ -152,36 +229,66 @@ function App() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={Boxstyle}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                Selecione o bairro
+              </Typography>
+            </Grid>
+            <Grid item >
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={bairro}
+                label="bairro"
+                onChange={(e) => setBairro(e.target.value as string)}
+              >
+                <MenuItem value={'Centro'}>Centro</MenuItem>
+              </Select>
+              <Button onClick={handleBairroClose}>Fechar</Button>
+            </Grid>
+          </Grid>
+        </Box>
+      </Modal>
+      <Modal
+        open={isUnidadeTransformadoraOpen}
+        onClose={handleUnidadeConsumidoraClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={Boxstyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Selecione a o bairro
+            Selecione a unidade consumidora
           </Typography>
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
-            value={bairro}
-            label="Age"
-            onChange={(e) => setBairro(e.target.value as string)}
+            value={unidadeConsumidora}
+            label="Unidade Consumidora"
+            onChange={(e) => setUnidadeConsumidora(e.target.value as string)}
           >
-            <MenuItem value={'Centro'}>Centro</MenuItem>
+            <MenuItem value={'000000001'}>000000001</MenuItem>
+            <MenuItem value={'000000002'}>000000002</MenuItem>
+            <MenuItem value={'000000003'}>000000003</MenuItem>
+            <MenuItem value={'000000004'}>000000004</MenuItem>
+            <MenuItem value={'000000005'}>000000005</MenuItem>
           </Select>
-          <Button onClick={handleBairroClose}>Fechar</Button>
+          <Button onClick={handleUnidadeConsumidoraClose}>Fechar</Button>
         </Box>
       </Modal>
-      <RightSideBar />
-
-      <MapContainer center={[35.755229, 51.304470]} zoom={13} style={{ height: '100vh', width: '100wh' }} scrollWheelZoom={false}>
+      <MapContainer center={[-25.441105, -49.276855]} zoom={13} style={{ height: '100vh', width: '100wh' }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={[35.755229, 51.304470]}>
+        <Marker icon={myIcon} position={[-25.441105, -49.276855]}>
           <Popup>
-            A pretty CSS3 popup. <br /> Easily customizable.
+            Localização da unidade consumidora analisada
           </Popup>
         </Marker>
-      </MapContainer>,
+      </MapContainer>
 
-    </div>
+    </div >
   );
 }
 
