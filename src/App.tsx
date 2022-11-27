@@ -21,13 +21,15 @@ import MailIcon from '@mui/icons-material/Mail';
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import Sidebar from '../src/components/Sidebar'
 import RightSideBar from '../src/components/RightSidebar'
+import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
-import { Button, Grid, MenuItem, Modal, Select } from '@mui/material';
+import { Button, Grid, IconButton, MenuItem, Modal, Select } from '@mui/material';
 import "leaflet/dist/leaflet.css";
 import Lottie from 'react-lottie';
 import animationData from './lotties/50186-task-complete-tick.json';
 import incorrectAnimationData from './lotties/91878-bouncy-fail.json'
+import { Icon } from 'leaflet';
 
 const L = require('leaflet');
 const myIcon = L.icon({
@@ -48,9 +50,10 @@ function App() {
   const [isCidadeModalOpen, setIsCidadeModalOpen] = useState<boolean>(false);
   const [isBairroModalOpen, setIsBairroModalOpen] = useState(false);
   const [isUnidadeTransformadoraOpen, setIsUnidadeTransformadoraOpen] = useState<boolean>(false);
+  const [isModalGraficoOpen, setIsModalGraficoOpen] = useState<boolean>(false);
   const [isAnalisarDrawerOpen, setIsAnalisarDrawerOpen] = useState<boolean>(false);
   const [isTransformadorModalOpen, setIsTransformadorModalOpen] = useState(false);
-  const [isGato, setIsGato] = useState<boolean>(true);
+  const [isGato, setIsGato] = useState<boolean>(false);
   const [latLong, setLatLong] = useState<[number, number]>([-25.3935, -51.4562]);
   function FlyMapTo() {
 
@@ -58,6 +61,7 @@ function App() {
 
     useEffect(() => {
       map.flyTo(latLong)
+      document.title = "Hackaton Copel 2022"
     }, [latLong])
 
     return null
@@ -153,6 +157,10 @@ function App() {
   const handleUnidadeConsumidoraClose = () => {
     setIsUnidadeTransformadoraOpen(false);
   }
+  const handleIsModalGraficoOpen = () => {
+    setIsModalGraficoOpen(false);
+  }
+
 
   const handleAnalisar = () => {
     setIsAnalisarDrawerOpen(true);
@@ -161,6 +169,7 @@ function App() {
     } else if (cidade === 'Curitiba') {
       handleCoordinateChange(curitiba[Number(unidadeConsumidora) - 1].latitude, curitiba[Number(unidadeConsumidora) - 1].longitude, 'Curitiba')
     }
+    setIsModalGraficoOpen(true);
 
   }
   const Boxstyle = {
@@ -175,7 +184,6 @@ function App() {
     p: 4,
   };
   const defaultOptions = {
-    keepLastFrame: true,
     autoplay: false,
     loop: false,
     speed: 0.5,
@@ -184,8 +192,7 @@ function App() {
       preserveAspectRatio: "xMidYMid slice"
     }
   };
-  const IncorrectdefaultOptions = {
-    keepLastFrame: true,
+  const IncorrectdefaultOptions = { 
     autoplay: false,
     loop: false,
     speed: 0.5,
@@ -275,7 +282,6 @@ function App() {
             <Typography variant="h6" style={{ color: '#FFFFFF' }}>{bairro}</Typography>
             <Typography align={'center'} variant="h6" style={{ fontWeight: 'bold', color: '#FFFFFF' }}>UNIDADE CONSUMIDORA</Typography>
             <Typography variant="h6" style={{ color: '#FFFFFF' }}>{unidadeConsumidora.toString().padStart(8, '0')}</Typography>
-            <Divider />
           </Grid>
           <br />
           <Grid item>
@@ -285,7 +291,7 @@ function App() {
               height={120}
               width={120}
             />}
-            {!isGato && <Typography variant="h6" style={{ color: '#FFFFFF' }}>Unidade consumidora segura</Typography>}
+            {!isGato && <Typography variant="h6" style={{ color: '#FFFFFF', fontWeight: 'bold' }}>Unidade consumidora segura</Typography>}
             <Divider />
             {isGato && <Lottie
 
@@ -293,7 +299,7 @@ function App() {
               height={120}
               width={120}
             />}
-            {isGato && <Typography variant="h6" style={{ color: '#FFFFFF' }}>Possível fraude de energia!</Typography>}
+            {isGato && <Typography variant="h6" style={{ color: '#FFFFFF', fontWeight: 'bold' }}>Possível fraude de energia!</Typography>}
             <Divider />
           </Grid>
         </Grid>
@@ -319,7 +325,7 @@ function App() {
             <MenuItem value={'Curitiba'}>Curitiba</MenuItem>
             <MenuItem value={'Guarapuava'}>Guarapuava</MenuItem>
           </Select>
-          <Button onClick={handleCidadeClose}>Fechar</Button>
+          <IconButton onClick={handleCidadeClose} sx={{ position: "fixed", top: 0, right: 0, zIndex: 2000 }} ><CloseIcon /></IconButton>
         </Box>
       </Modal>
       <Modal
@@ -345,7 +351,7 @@ function App() {
               >
                 <MenuItem value={'Centro'}>Centro</MenuItem>
               </Select>
-              <Button onClick={handleBairroClose}>Fechar</Button>
+              <IconButton onClick={handleBairroClose} sx={{ position: "fixed", top: 0, right: 0, zIndex: 2000 }} ><CloseIcon /></IconButton>
             </Grid>
           </Grid>
         </Box>
@@ -373,10 +379,23 @@ function App() {
             <MenuItem value={4}>000000004</MenuItem>
             <MenuItem value={5}>000000005</MenuItem>
           </Select>
-          <Button onClick={handleUnidadeConsumidoraClose}>Fechar</Button>
+          <IconButton onClick={handleUnidadeConsumidoraClose} sx={{ position: "fixed", top: 0, right: 0, zIndex: 2000 }} ><CloseIcon /></IconButton>
         </Box>
       </Modal>
-      <MapContainer center={latLong} zoom={13} style={{ height: '100vh', width: '100wh' }} scrollWheelZoom={false}>
+      <Modal
+        open={isModalGraficoOpen}
+        onClose={handleIsModalGraficoOpen}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={Boxstyle}>
+          <IconButton onClick={handleIsModalGraficoOpen} sx={{ position: "fixed", top: 0, right: 0, zIndex: 2000 }} ><CloseIcon /></IconButton>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Detalhamento da análise
+          </Typography>
+        </Box>
+      </Modal>
+      <MapContainer center={latLong} zoom={14} style={{ height: '100vh', width: '100wh' }} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
